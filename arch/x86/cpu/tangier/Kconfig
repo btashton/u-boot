@@ -23,6 +23,14 @@ config SYS_USB_OTG_BASE
 	hex
 	default 0xf9100000
 
+config SYS_EMMC_PORT_BASE
+	hex
+	default 0xff3fc000
+
+config SYS_SD_PORT_BASE
+	hex
+	default 0xff3fa000
+
 config SYS_TANGIER_PMU_BASE
 	hex
 	default 0xff00b000

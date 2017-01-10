@@ -7,11 +7,9 @@
  */
 
 #include <common.h>
-#include <mmc.h>
-#include <pci.h>
-#include <pci_ids.h>
 #include <asm/arch/intel-mid.h>
 #include <asm/arch/intel_soc_mrfld.h>
+#include <asm/arch/mmc.h>
 #include <asm/u-boot-x86.h>
 #include <asm/cache.h>
 #include <asm/io.h>
@@ -21,18 +19,6 @@
 #include <u-boot/md5.h>
 
 DECLARE_GLOBAL_DATA_PTR;
-
-#define PCI_DEVICE_ID_INTEL_MRFLD_MMC	0x1190
-
-static struct pci_device_id mmc_supported[] = {
-	{ PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_MRFLD_MMC },
-	{},
-};
-
-int cpu_mmc_init(bd_t *bis)
-{
-	return pci_mmc_init("Tangier SDHCI", mmc_supported);
-}
 
 /*
  * Miscellaneous platform dependent initializations
@@ -172,6 +158,19 @@ void panic_puts(const char *str)
 int print_cpuinfo(void)
 {
 	return default_print_cpuinfo();
+}
+
+int board_mmc_init(bd_t * bis)
+{
+	int err;
+
+	/* add sdhci for eMMC */
+	err = tangier_sdhci_init(CONFIG_SYS_EMMC_PORT_BASE, 0, 4);
+	if (err)
+		return err;
+
+	/* add sdhci for SD card */
+	return tangier_sdhci_init(CONFIG_SYS_SD_PORT_BASE, 0, 4);
 }
 
 void reset_cpu(ulong addr)
