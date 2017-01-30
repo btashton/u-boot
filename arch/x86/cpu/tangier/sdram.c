@@ -94,7 +94,7 @@ static unsigned long sfi_search_mmap(void)
 
 	/* Search through each SYST entry for MMAP table */
 	for (i = 0; i < sys_entry_cnt; i++) {
-		sbh = (struct sfi_table_header *) (sb + 1);
+		sbh = (struct sfi_table_header *)sb->pentry[i];
 		if (*(u32 *) sbh->sig == SFI_MMAP_MAGIC) {
 			if (!sfi_table_check((struct sfi_table_header *)sbh))
 				return (unsigned long)sbh;
