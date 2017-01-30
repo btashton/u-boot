@@ -76,7 +76,8 @@
 /*-----------------------------------------------------------------------
  * Boot
  */
-
+#define CONFIG_BOOTCOUNT_LIMIT
+#define CONFIG_BOOTCOUNT_ENV
 #define CONFIG_ZBOOT_32
 #define CONFIG_CMD_ZBOOT
 #define CONFIG_BOOTCOMMAND "run bootcmd"
@@ -180,11 +181,15 @@
  * Environment
  */
 #define CONFIG_ENV_IS_IN_MMC
+/*
 #define CONFIG_SYS_MMC_ENV_DEV                  0
 #define CONFIG_SYS_MMC_ENV_PART                 0
+ */
 #define CONFIG_ENV_SIZE                         (64*1024)
+/*
 #define CONFIG_ENV_OFFSET	(3 * 1024 * 1024)
 #define CONFIG_ENV_OFFSET_REDUND (6 * 1024 * 1024)
+ */
 #define CONFIG_SUPPORT_EMMC_BOOT
 #define CONFIG_CMD_SETEXPR
 
