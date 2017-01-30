@@ -35,9 +35,6 @@ enum sfi_mem_type {
 	SFI_MEM_TYPEMAX,
 };
 
-#define SFI_SYST_MAGIC	0x54535953
-#define SFI_MMAP_MAGIC	0x50414d4d
-
 #define SFI_BASE_ADDR		0x000E0000
 #define SFI_LENGTH		0x00020000
 #define SFI_TABLE_LENGTH	16
@@ -66,39 +63,33 @@ static int sfi_table_check(struct sfi_table_header *sbh)
 
 static unsigned long sfi_search_mmap(void)
 {
-	u32 i = 0;
-	u32 *pos = (u32 *) SFI_BASE_ADDR;
-	u32 *end = (u32 *) (SFI_BASE_ADDR + SFI_LENGTH);
 	struct sfi_table_header *sbh;
 	struct sfi_table_simple *sb;
-	u32 sys_entry_cnt = 0;
+	u32 sys_entry_cnt;
+	u32 i;
 
 	/* Find SYST table */
-	for (; pos < end; pos += 4) {
-		if (*pos == SFI_SYST_MAGIC) {
-			if (!sfi_table_check((struct sfi_table_header *)pos))
-				break;
-		}
+	for (i = 0; i < SFI_LENGTH; i += SFI_TABLE_LENGTH) {
+		sb = (struct sfi_table_simple *)(SFI_BASE_ADDR + i);
+		sbh = (struct sfi_table_header *)sb;
+		if (!strncmp(sbh->sig, SFI_SIG_SYST, SFI_SIGNATURE_SIZE) &&
+		    !sfi_table_check(sbh))
+			break;
 	}
 
-	if (pos >= end) {
+	if (i >= SFI_LENGTH) {
 		error("failed to locate SFI SYST table\n");
 		return 0;
 	}
 
-	/* map table pointers */
-	sb = (struct sfi_table_simple *)pos;
-	sbh = (struct sfi_table_header *)sb;
-
-	sys_entry_cnt = (sbh->len - sizeof(struct sfi_table_header)) >> 3;
+	sys_entry_cnt = (sbh->len - sizeof(struct sfi_table_header)) / 8;
 
 	/* Search through each SYST entry for MMAP table */
 	for (i = 0; i < sys_entry_cnt; i++) {
 		sbh = (struct sfi_table_header *)(unsigned long)sb->pentry[i];
-		if (*(u32 *) sbh->sig == SFI_MMAP_MAGIC) {
-			if (!sfi_table_check((struct sfi_table_header *)sbh))
-				return (unsigned long)sbh;
-		}
+		if (!strncmp(sbh->sig, SFI_SIG_MMAP, SFI_SIGNATURE_SIZE) &&
+		    !sfi_table_check(sbh))
+			return (unsigned long)sbh;
 	}
 
 	return 0;
